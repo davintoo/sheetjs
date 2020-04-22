@@ -1,3 +1,8 @@
+# About this fork
+**NOTE:** [This project](https://github.com/SheetJS/sheetjs) is a fork of the original (and awesome) [SheetJS](https://github.com/SheetJS/sheetjs) project.
+It is extended to enable cell formats to be read written to .xlsx workbooks.
+Report any issues to https://github.com/SheetJS/sheetjs/issues.
+
 # [SheetJS js-xlsx](http://sheetjs.com)
 
 Parser and writer for various spreadsheet formats.  Pure-JS cleanroom

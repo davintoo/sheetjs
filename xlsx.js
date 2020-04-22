@@ -13,6 +13,7 @@ if(typeof module !== "undefined" && typeof require !== 'undefined') {
 		else if(typeof window !== 'undefined') window.cptable = require('./dist/cpexcel.js');
 	}
 }
+var StyleBuilder = require('./style-builder.js');
 
 var VALID_ANSI = [ 874, 932, 936, 949, 950 ];
 for(var i = 0; i <= 8; ++i) VALID_ANSI.push(1250 + i);
@@ -9198,6 +9199,10 @@ var STYLES_XML_ROOT = writextag('styleSheet', null, {
 RELS.STY = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles";
 
 function write_sty_xml(wb, opts) {
+	if (typeof opts.style_builder != 'undefined') {
+		return opts.style_builder.toXml();
+	}
+
 	var o = [XML_HEADER, STYLES_XML_ROOT], w;
 	if(wb.SSF && (w = write_numFmts(wb.SSF)) != null) o[o.length] = w;
 	o[o.length] = ('<fonts count="1"><font><sz val="12"/><color theme="1"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font></fonts>');
@@ -12961,6 +12966,17 @@ function default_margins(margins, mode) {
 }
 
 function get_cell_style(styles, cell, opts) {
+	if (typeof opts.style_builder != 'undefined') {
+		if (cell.s && (cell.s == +cell.s)) { return cell.s}  // if its already an integer index, let it be
+		if (!cell.s) cell.s = {}
+		if (cell.z) cell.s.numFmtId = cell.z;
+		// console.log('cell.s before', cell.s);
+		cell.s = opts.style_builder.addStyle(cell.s);
+		// console.log('cell.s after', cell.s);
+
+		return cell.s;
+	}
+
 	var z = opts.revssf[cell.z != null ? cell.z : "General"];
 	var i = 0x3c, len = styles.length;
 	if(z == null && opts.ssf) {
@@ -20815,6 +20831,7 @@ function write_cfb_ctr(cfb, o) {
 
 function write_zip_type(wb, opts) {
 	var o = opts||{};
+	o.style_builder = new StyleBuilder(o);
 	var z = write_zip(wb, o);
 	var oopts = {};
 	if(o.compression) oopts.compression = 'DEFLATE';
